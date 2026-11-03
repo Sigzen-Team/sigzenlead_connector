@@ -82,5 +82,5 @@ the repository has to be on a host it can reach (GitHub is what the Marketplace 
 
 - [ ] Add the app in the Frappe Cloud dashboard, choose the `master` branch for version 16 and
       confirm it builds
-- [ ] Install it on a Frappe Cloud test site and pair it once with SigzenLead end to end
+- [ ] Install it on a Frappe Cloud test site and pair it once with SigzenLEAD end to end
 - [ ] Submit for review and answer the reviewer's questions

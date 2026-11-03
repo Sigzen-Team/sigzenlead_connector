@@ -1242,7 +1242,7 @@ def _assign_new_lead(lead, warnings):
 				"assign_to": [owner],
 				"doctype": "Lead",
 				"name": lead.name,
-				"description": _("New lead synced from SigzenLead."),
+				"description": _("New lead synced from SigzenLEAD."),
 			}
 		)
 	except Exception as exc:

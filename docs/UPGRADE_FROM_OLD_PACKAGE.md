@@ -7,7 +7,7 @@ This app's Python package has carried four names:
 | `vc_connector` | development builds, before the first release |
 | `sigzen_ai_scan_crm_connector` | release 1.0.0, when the product was "Sigzen - AI Scan CRM" |
 | `ai_snaplead_connector` | releases 1.1.x, when the product was "AI SnapLead" |
-| `sigzenlead_connector` | now: the product is **SigzenLead** and the app is **SigzenLead - Connector** |
+| `sigzenlead_connector` | now: the product is **SigzenLEAD** and the app is **SigzenLEAD - Connector** |
 
 **If you install the app from the Frappe Marketplace, or install it for the first time, none of
 this applies to you.**
@@ -18,7 +18,7 @@ script to run.
 
 ## Steps
 
-Do this in a maintenance window. Deliveries from SigzenLead that arrive while the site is down
+Do this in a maintenance window. Deliveries from SigzenLEAD that arrive while the site is down
 are retried by the central site; none are lost.
 
 ```bash

@@ -1,9 +1,9 @@
-# SigzenLead - Connector
+# SigzenLEAD - Connector
 
-Receive the leads your sales team scans with **SigzenLead** straight into your own ERPNext,
+Receive the leads your sales team scans with **SigzenLEAD** straight into your own ERPNext,
 as standard **Lead**, **Contact** and **Address** records.
 
-SigzenLead is a mobile app for scanning business cards at expos, events and meetings. This
+SigzenLEAD is a mobile app for scanning business cards at expos, events and meetings. This
 connector is the ERPNext side of it. Install it on your ERPNext site, pair it once, and every
 lead your team captures arrives in your normal Lead list, tagged with the source it came from
 and with the card photos attached.
@@ -16,27 +16,27 @@ and with the card photos attached.
 | Licence | MIT |
 | Publisher | Sigzen Technologies Pvt. Ltd. |
 
-## What is SigzenLead, and why a connector?
+## What is SigzenLEAD, and why a connector?
 
-**SigzenLead** ([sigzenlead.com](https://sigzenlead.com)) is a lead-capture service run by
+**SigzenLEAD** ([sigzenlead.com](https://sigzenlead.com)) is a lead-capture service run by
 Sigzen Technologies. It has two parts:
 
 - **The mobile app** (Android and iOS). Your sales team photographs a business card, and AI
   reads the name, company, job title, phones, emails, website and address from it. The lead
   is tagged with the expo, event or campaign where the card was collected.
-- **The SigzenLead website** ([sigzenlead.com](https://sigzenlead.com)). The business owner
+- **The SigzenLEAD website** ([sigzenlead.com](https://sigzenlead.com)). The business owner
   manages the team, the plan, the lead sources and the connection to ERPNext. Every scanned
   lead is kept here too.
 
-SigzenLead is a hosted service. It is **not** installed on your ERPNext site, and it works
-on its own: a team can scan and manage leads in SigzenLead without any ERPNext at all.
+SigzenLEAD is a hosted service. It is **not** installed on your ERPNext site, and it works
+on its own: a team can scan and manage leads in SigzenLEAD without any ERPNext at all.
 
 **This app is the bridge to your ERPNext.** Most businesses don't want their leads stuck in
 one more tool. They want them where sales already works: in the ERPNext Lead list, next to
 their quotations, customers and follow-ups. The connector makes that happen:
 
 ```
- Sales team        SigzenLead (hosted)           Your ERPNext + this connector
+ Sales team        SigzenLEAD (hosted)           Your ERPNext + this connector
 ┌──────────┐      ┌──────────────────────┐      ┌──────────────────────────────┐
 │ scans a  │ ───▶ │ AI reads the card,   │ ───▶ │ Lead + Contact + Address     │
 │ card     │      │ stores the lead      │      │ + card photos, in your lists │
@@ -48,12 +48,12 @@ scanned card becomes a normal ERPNext Lead within minutes, with nothing typed by
 
 | You want to… | You need |
 | --- | --- |
-| Scan cards and keep the leads in SigzenLead only | SigzenLead (app + account). No connector. |
-| Get those leads into your ERPNext automatically | SigzenLead **and** this connector on your ERPNext site |
-| Use this connector without SigzenLead | Not possible. It only accepts leads sent by SigzenLead. |
+| Scan cards and keep the leads in SigzenLEAD only | SigzenLEAD (app + account). No connector. |
+| Get those leads into your ERPNext automatically | SigzenLEAD **and** this connector on your ERPNext site |
+| Use this connector without SigzenLEAD | Not possible. It only accepts leads sent by SigzenLEAD. |
 
-To get started with SigzenLead, sign up at [sigzenlead.com](https://sigzenlead.com) and
-install the SigzenLead app on your team's phones. Then install this connector and follow
+To get started with SigzenLEAD, sign up at [sigzenlead.com](https://sigzenlead.com) and
+install the SigzenLEAD app on your team's phones. Then install this connector and follow
 [Setup](#setup) below.
 
 ## Features
@@ -77,7 +77,7 @@ install the SigzenLead app on your team's phones. Then install this connector an
 ## How it works
 
 ```
-SigzenLead  ── HTTPS POST ──▶  your ERPNext  ──▶  Lead / Contact / Address / File
+SigzenLEAD  ── HTTPS POST ──▶  your ERPNext  ──▶  Lead / Contact / Address / File
              ◀── JSON reply ──
 ```
 
@@ -89,7 +89,7 @@ send your data anywhere on its own.
 created, modified or deleted by installing the app or by `bench migrate`.
 
 Every delivery must present two things: the API key of an ERPNext user you create for the
-integration, and a connector token that identifies your SigzenLead account. Either one alone
+integration, and a connector token that identifies your SigzenLEAD account. Either one alone
 is refused. Disable that user, or untick **Enabled** in the settings, and deliveries stop at
 once.
 
@@ -97,7 +97,7 @@ once.
 
 - Frappe Framework **version 16**
 - ERPNext **version 16** (required; the app refuses to install without it)
-- An **SigzenLead** business account on a plan that includes the ERPNext connection
+- An **SigzenLEAD** business account on a plan that includes the ERPNext connection
 - An **Address Template** on the site (*Setup > Printing and Branding > Address Template*).
   ERPNext cannot save any Address without one, and a site created without the setup wizard
   has none.
@@ -109,18 +109,18 @@ Tested on MariaDB 10.11, which Frappe Cloud uses, and on SQLite.
 ### Frappe Cloud
 
 1. Open your site in the Frappe Cloud dashboard.
-2. Go to **Apps**, choose **Install App** and select **SigzenLead - Connector**.
+2. Go to **Apps**, choose **Install App** and select **SigzenLEAD - Connector**.
 3. Wait for the install to finish. No further deploy step is needed.
 
 ### Self-hosted bench
 
 ```bash
-bench get-app sigzenlead_connector http://192.168.1.51/Sigzen-Team/ai_snaplead_connector.git --branch master
+bench get-app https://github.com/Sigzen-Team/sigzenlead_connector.git --branch master
 bench --site <your-site> install-app sigzenlead_connector
 bench --site <your-site> migrate
 ```
 
-After installing you will find an **SigzenLead - Connector** tile on the desk. It opens
+After installing you will find an **SigzenLEAD - Connector** tile on the desk. It opens
 a workspace with the settings, the received leads and the log.
 
 ## Setup
@@ -138,14 +138,14 @@ and give it these two roles:
 | **Connector Integration** (added by this app) | create and update the connector's own link records |
 
 Do not use your own login, and avoid making the integration user a System Manager unless you
-want SigzenLead to finish steps 3 and 4 for you (see below).
+want SigzenLEAD to finish steps 3 and 4 for you (see below).
 
 ### 2. Fill in the settings
 
 Open **Connector Settings** from the workspace.
 
-- **Business ID**: your SigzenLead business ID. It is filled in automatically when you
-  connect from SigzenLead (step 4) with a System Manager user; otherwise set it here and
+- **Business ID**: your SigzenLEAD business ID. It is filled in automatically when you
+  connect from SigzenLEAD (step 4) with a System Manager user; otherwise set it here and
   check it before saving. Only a System Manager can change it later; the form shows how many
   linked leads will move before it saves. If this ERPNext is already linked to a different
   business, connecting refuses with `BUSINESS_MISMATCH` instead of changing it.
@@ -156,21 +156,21 @@ Open **Connector Settings** from the workspace.
 Still in **Connector Settings**, click **Generate Connector Token**. The token is shown
 once. Copy it. Only a hash of it is stored on your site.
 
-### 4. Connect from SigzenLead
+### 4. Connect from SigzenLEAD
 
-The business owner or manager signs in to SigzenLead, either on the website
+The business owner or manager signs in to SigzenLEAD, either on the website
 (**Dashboard > Connectors**) or in the mobile app (**Profile > ERPNext Settings**), enters your
 site address, the integration user and its password, then saves and clicks **Test Connection**.
 
-If the integration user is a System Manager, SigzenLead creates the API key and the connector
+If the integration user is a System Manager, SigzenLEAD creates the API key and the connector
 token, and fills in the Business ID, by itself during this step. Otherwise, generate an API key for the user
 (*User > API Access > Generate Keys*) and give the key, the secret and the token from step 3
-to your SigzenLead administrator.
+to your SigzenLEAD administrator.
 
 ### 5. Scan a card
 
 Scan a business card in the app. Within a few minutes the lead appears in your ERPNext Lead
-list, and **Last Request On** in the settings shows when SigzenLead last reached your site.
+list, and **Last Request On** in the settings shows when SigzenLEAD last reached your site.
 
 ## What the app adds to your site
 
@@ -189,7 +189,7 @@ No standard ERPNext field is hidden, renamed or made read-only.
 | --- | --- |
 | Leads do not arrive | Open **Connector Log**; the newest row says why the delivery was refused. |
 | `SETUP_REQUIRED` | Create an Address Template (see Requirements). Nothing was lost; the lead is retried. |
-| `TOKEN_INVALID` | The token in SigzenLead does not match. Generate a new one and enter it again. |
+| `TOKEN_INVALID` | The token in SigzenLEAD does not match. Generate a new one and enter it again. |
 | `BUSINESS_MISMATCH` | The Business ID in the settings is not the one the leads are sent for. |
 | `REMOTE_PERMISSION` | The integration user is missing one of the two roles in step 1. |
 | `CONNECTOR_DISABLED` | Tick **Enabled** in the settings. |
@@ -222,7 +222,7 @@ bench --site <test-site> run-tests --app sigzenlead_connector
 ```
 
 The suite has 275 tests and leaves no records behind. Run it on a test site, never on a site
-that is paired with a live SigzenLead account: it rewrites the connector settings while it
+that is paired with a live SigzenLEAD account: it rewrites the connector settings while it
 runs.
 
 Code is checked with [ruff](https://docs.astral.sh/ruff/) and the

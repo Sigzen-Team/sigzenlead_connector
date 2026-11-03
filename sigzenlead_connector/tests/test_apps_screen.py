@@ -115,7 +115,7 @@ class TestTheDesktopIconExists(IntegrationTestCase):
 		"""Icons and saved layouts on installed sites may still name the 1.1.0 file."""
 		for name in ("vc-connector-logo.svg", "sigzenlead-connector-logo.svg"):
 			with open(frappe.get_app_path(APP, "public", "images", name)) as handle:
-				self.assertIn("<title>SigzenLead - Connector</title>", handle.read(), name)
+				self.assertIn("<title>SigzenLEAD - Connector</title>", handle.read(), name)
 
 	def test_migrate_moves_the_tile_off_the_old_logo(self):
 		"""An app tile still showing the old link glyph gets the current logo; a client's own logo stays."""

@@ -11,7 +11,7 @@ app_name = "sigzenlead_connector"
 app_title = "SigzenLead - Connector"
 app_publisher = "Sigzen Technologies Pvt. Ltd."
 app_description = (
-	"Receive business-card leads from SigzenLead into ERPNext as standard Leads, Contacts and Addresses."
+	"Receive business-card leads from SigzenLEAD into ERPNext as standard Leads, Contacts and Addresses."
 )
 app_email = "support@sigzen.com"
 app_license = "mit"
@@ -30,7 +30,7 @@ required_apps = ["erpnext"]
 # Put the app on the /apps screen. Without this the app installs and works, but a client
 # has no way to FIND it: its doctypes are only reachable by typing a URL. The route points
 # at the app's own workspace rather than a custom page, so there is one place to configure.
-# The logo is the SigzenLead - Connector mark (see the "logo" key below).
+# The logo is the SigzenLEAD - Connector mark (see the "logo" key below).
 #
 # app_logo_url is deliberately NOT set. Frappe already takes this app's logo for /apps, the
 # app switcher and the sidebar header from add_to_apps_screen. And navbar_settings.get_app_logo()
@@ -53,7 +53,7 @@ add_to_apps_screen = [
 		# are created -- so a missing key leaves the CLIENT's whole site with no desktop
 		# icons, failing silently inside a print()-only except block.
 		#
-		# The SigzenLead family mark (scan frame around a database: scanned cards landing in
+		# The SigzenLEAD family mark (scan frame around a database: scanned cards landing in
 		# this ERPNext). images/vc-connector-logo.svg, the path 1.1.0 and earlier shipped, holds
 		# the same mark for icons that still point there; install.repair_desk() repoints them.
 		"logo": "/assets/sigzenlead_connector/images/sigzenlead-connector-logo.svg",

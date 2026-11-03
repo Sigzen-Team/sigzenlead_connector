@@ -205,7 +205,7 @@ def issue_connector_token(business_id: str | None = None):
 
 	Central sends the business it is connecting for, so nobody has to open this site to type
 	it. A blank Business ID is filled in; the same one is a no-op. A DIFFERENT one is refused
-	and no token is minted: this site already belongs to another SigzenLead business, and
+	and no token is minted: this site already belongs to another SigzenLEAD business, and
 	moving it is the deliberate System Manager change in Connector Settings (which re-stamps
 	the rows that carry the old id) -- never a side effect of someone else's onboarding.
 	Omitted, the endpoint behaves exactly as in 1.1.0.
@@ -222,7 +222,7 @@ def issue_connector_token(business_id: str | None = None):
 		claimed = business_id.strip() if isinstance(business_id, str) else ""
 		if not BUSINESS_ID_PATTERN.match(claimed):
 			return _token_refusal(
-				"VALIDATION_FAILED", _("business_id is not a valid SigzenLead business ID.")
+				"VALIDATION_FAILED", _("business_id is not a valid SigzenLEAD business ID.")
 			)
 
 		current = (settings.business_id or "").strip()
@@ -230,7 +230,7 @@ def issue_connector_token(business_id: str | None = None):
 			return _token_refusal(
 				"BUSINESS_MISMATCH",
 				_(
-					"This ERPNext is already linked to another SigzenLead business ({0}), not {1}."
+					"This ERPNext is already linked to another SigzenLEAD business ({0}), not {1}."
 					" An ERPNext System Manager must change Business ID in Connector Settings"
 					" before it can be connected to this business."
 				).format(current, claimed),
