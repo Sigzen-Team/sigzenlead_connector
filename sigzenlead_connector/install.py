@@ -34,8 +34,8 @@ INTEGRATION_ROLE_PERMISSIONS = {
 #: so any difference produces a URL that resolves to nothing. The route is
 #: /desk/sigzenlead-connector.
 #:
-#: APP_LABEL ("SigzenLead - Connector") is what people read: the tile, the sidebar header and
-#: the heading inside the workspace.
+#: APP_LABEL ("SigzenLead - Connector") is the tile's label and the sidebar's name: desktop.js
+#: finds one by the other, so it is a key. Only the heading inside the workspace is free text.
 from sigzenlead_connector.brand_rename import (
 	APP_LABEL,
 	LEGACY_APP_LABELS,
@@ -43,6 +43,9 @@ from sigzenlead_connector.brand_rename import (
 	LEGACY_WORKSPACES,
 	WORKSPACE,
 )
+
+#: The heading inside the workspace, in the brand sheet's spelling. Free text, unlike APP_LABEL.
+WORKSPACE_HEADING = "SigzenLEAD - Connector"
 
 APP = "sigzenlead_connector"
 
@@ -86,7 +89,7 @@ def check_frappe_version(version=None):
 	if major is not None and major < MIN_FRAPPE_MAJOR:
 		frappe.throw(
 			_(
-				"SigzenLead - Connector needs Frappe/ERPNext v16. This site runs Frappe {0}; upgrade"
+				"SigzenLEAD - Connector needs Frappe/ERPNext v16. This site runs Frappe {0}; upgrade"
 				" the bench to v16 before installing or migrating this app."
 			).format(version if version is not None else frappe.__version__),
 			title=_("Unsupported Frappe Version"),
@@ -925,9 +928,9 @@ def _sync_workspace_header(path):
 		data = block.get("data") or {}
 		text = data.get("text") or ""
 		if block.get("type") == "header":
-			legacy = next((name for name in LEGACY_APP_LABELS if name in text), None)
-			if legacy and APP_LABEL not in text:
-				data["text"] = text.replace(legacy, APP_LABEL)
+			legacy = next((name for name in (*LEGACY_APP_LABELS, APP_LABEL) if name in text), None)
+			if legacy:
+				data["text"] = text.replace(legacy, WORKSPACE_HEADING)
 				changed = True
 			continue
 
@@ -1070,8 +1073,8 @@ def _add_icon_to_saved_layouts():
 	return updated
 
 
-#: What the mobile product was called in body copy before it became "SigzenLead".
-LEGACY_PRODUCT_NAMES = ("AI SnapLead", "AI Scan CRM", "VC Scan", "Sigzen Scan", "SigzenScan")
+#: What the mobile product was called in body copy before it became "SigzenLEAD".
+LEGACY_PRODUCT_NAMES = ("SigzenLead", "AI SnapLead", "AI Scan CRM", "VC Scan", "Sigzen Scan", "SigzenScan")
 
 
 def _rename_legacy_workspace():

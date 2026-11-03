@@ -70,7 +70,7 @@ class TestWorkspaceRoute(IntegrationTestCase):
 			declared = json.load(handle)
 		self.assertEqual((declared["name"], declared["label"], declared["title"]), (install.WORKSPACE,) * 3)
 		# The heading inside the workspace keeps the visible title.
-		self.assertIn(f"<b>{install.APP_LABEL}</b>", declared["content"])
+		self.assertIn(f"<b>{install.WORKSPACE_HEADING}</b>", declared["content"])
 
 	def test_tile_opens_the_workspace_in_the_same_tab_and_is_no_folder(self):
 		icon = _app_icon()
@@ -152,7 +152,7 @@ class TestWorkspaceRoute(IntegrationTestCase):
 			"the workspace's roles did not move with it",
 		)
 		self.assertIn(
-			f"<b>{install.APP_LABEL}</b>", frappe.db.get_value("Workspace", install.WORKSPACE, "content")
+			f"<b>{install.WORKSPACE_HEADING}</b>", frappe.db.get_value("Workspace", install.WORKSPACE, "content")
 		)
 
 		self.assertEqual(frappe.db.get_value("Workspace Sidebar", install.SIDEBAR, "title"), install.SIDEBAR)

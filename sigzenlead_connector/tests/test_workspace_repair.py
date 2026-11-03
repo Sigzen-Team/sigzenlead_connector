@@ -145,7 +145,7 @@ class TestWorkspaceRepair(IntegrationTestCase):
 		self.assertTrue(headers)
 		self.assertEqual(
 			headers[0]["data"]["text"],
-			f'<span class="h4"><b>{install.APP_LABEL}</b></span>',
+			f'<span class="h4"><b>{install.WORKSPACE_HEADING}</b></span>',
 		)
 		# A block the client added survives.
 		self.assertIn(mine, after)

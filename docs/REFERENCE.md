@@ -1,4 +1,4 @@
-# SigzenLead - Connector: technical reference
+# SigzenLEAD - Connector: technical reference
 
 The full reference for administrators and integrators. For what the app is and how to set it
 up, start with the [README](../README.md).
