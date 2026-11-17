@@ -11,6 +11,7 @@ breaking change for every central site in the field and gets its own major relea
 
 | App version | Protocol | Frappe | ERPNext |
 | --- | --- | --- | --- |
+| Unreleased | `vc-connector/1` | 15 and 16 (refused on < 15) | 15 and 16 |
 | 1.1.1 | `vc-connector/1` | 16 (refused on < 16) | 16 |
 | 1.1.0 | `vc-connector/1` | 16 (refused on < 16) | 16 |
 | 1.0.0 | `vc-connector/1` | 16 (verified on 16.25.0 and 16.26.3) | 16 (verified on 16.26.2 and 16.27.0) |
@@ -20,6 +21,18 @@ breaking change for every central site in the field and gets its own major relea
 ## [Unreleased]
 
 ### Changed
+
+- **Frappe/ERPNext 15 supported again, next to 16.** One code path, feature-detected:
+  - Lead: `extend_doctype_class` on Frappe 16 (unchanged); on Frappe 15, which has no such
+    hook, the same `CustomLead` is attached with `override_doctype_class` (hooks.py).
+  - The version guard now refuses Frappe < 15 ("needs Frappe/ERPNext v15 or v16").
+  - Lead source: `Lead.source` -> `Lead Source` on ERPNext 15, `Lead.utm_source` ->
+    `UTM Source` on ERPNext 16; created when missing on both (already runtime-resolved).
+  - The app tile / Workspace Sidebar / Desktop Icon repairs and renames run only where the
+    Frappe 16 desk exists (`Workspace Sidebar` DocType) instead of failing in a savepoint on 15.
+  - Tests import `frappe.tests.IntegrationTestCase`; on Frappe 15 `compat.py` resolves it to
+    `FrappeTestCase`. Frappe 16 is untouched.
+  - `[tool.bench.frappe-dependencies]`: `>=15.0.0,<17.0.0` for frappe and erpnext.
 
 - **Renamed to SigzenLead - Connector.** The product is now SigzenLead. Package
   `ai_snaplead_connector` -> `sigzenlead_connector`, module "AI SnapLead Connector" -> "SigzenLead

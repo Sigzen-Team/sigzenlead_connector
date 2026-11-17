@@ -79,12 +79,17 @@ class TestUpsertDocumentIsGated(SettingsTestCase):
 			frappe.set_user("Administrator")
 			user = _make_user(roles)
 			frappe.set_user(user)
-			with patch.object(frappe.db, "commit") as commit:
+			# Frappe 15's frappe.only_for lets every caller through while flags.in_test is set (a
+			# real request never has it); clear it so the gate is exercised. No-op on Frappe 16.
+			with (
+				patch.object(frappe.db, "commit") as commit,
+				patch.dict(frappe.local.flags, {"in_test": False}),
+			):
 				with self.assertRaises(frappe.PermissionError):
 					legacy_sync.upsert_document("UTM Source", {"source_name": source}, name=source)
 			commit.assert_not_called()
 			frappe.set_user("Administrator")
-			self.assertFalse(frappe.db.exists("UTM Source", source))
+			self.assertFalse(frappe.db.exists(_site_source_doctype(), source))
 
 	def test_the_integration_role_can_write(self):
 		user = _make_user([install.INTEGRATION_ROLE])
@@ -93,7 +98,12 @@ class TestUpsertDocumentIsGated(SettingsTestCase):
 		with patch.object(frappe.db, "commit"):
 			result = legacy_sync.upsert_document("UTM Source", {"source_name": source}, name=source)
 		self.assertEqual(result["operation"], "created")
-		self.assertTrue(frappe.db.exists("UTM Source", source))
+		# Central sends "UTM Source"; ERPNext 15 files it as a Lead Source.
+		self.assertTrue(frappe.db.exists(_site_source_doctype(), source))
+
+
+def _site_source_doctype():
+	return "UTM Source" if frappe.db.exists("DocType", "UTM Source") else "Lead Source"
 
 
 class TestStateChangingEndpointsArePostOnly(IntegrationTestCase):
@@ -256,19 +266,28 @@ class TestBusinessIdRestampIsBulk(SettingsTestCase):
 
 
 class TestFrappeVersionGuard(IntegrationTestCase):
-	def test_v15_is_refused_with_a_clear_message(self):
+	def test_v14_is_refused_with_a_clear_message(self):
 		with self.assertRaises(frappe.ValidationError) as ctx:
-			install.check_frappe_version("15.62.1")
-		self.assertIn("needs Frappe/ERPNext v16", str(ctx.exception))
+			install.check_frappe_version("14.62.1")
+		self.assertIn("needs Frappe/ERPNext v15 or v16", str(ctx.exception))
 
-	def test_v16_and_develop_pass(self):
-		for version in ("16.0.0", "16.26.3", "17.0.0-dev", "develop", ""):
+	def test_v15_v16_and_develop_pass(self):
+		for version in ("15.0.0", "15.126.1", "16.0.0", "16.26.3", "17.0.0-dev", "develop", ""):
 			install.check_frappe_version(version)
-		install.check_frappe_version()  # the running bench is v16
+		install.check_frappe_version()  # the running bench (v15 or v16)
+
+	def test_lead_extension_is_attached_on_this_frappe(self):
+		"""v16 mixes CustomLead in (extend_doctype_class); v15 overrides with it. Either way the
+		Lead controller frappe resolves must be (or include) this app's class."""
+		from frappe.model.base_document import get_controller
+
+		from sigzenlead_connector.overrides.lead import CustomLead
+
+		self.assertTrue(issubclass(get_controller("Lead"), CustomLead))
 
 	def test_before_install_refuses_before_doing_anything(self):
 		with (
-			patch.object(frappe, "__version__", "15.40.0"),
+			patch.object(frappe, "__version__", "14.40.0"),
 			patch("sigzenlead_connector.brand_rename.refresh_module_map") as refresh,
 		):
 			with self.assertRaises(frappe.ValidationError):

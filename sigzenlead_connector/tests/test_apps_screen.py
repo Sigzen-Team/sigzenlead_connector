@@ -14,6 +14,8 @@ and both readings are wrong in a way no error message corrects.
 import frappe
 from frappe.tests import IntegrationTestCase
 
+from sigzenlead_connector.brand_rename import has_app_desktop
+from sigzenlead_connector.compat import frappe_desk_mount
 from sigzenlead_connector.install import WORKSPACE, ensure_workspace, has_app_permission
 from sigzenlead_connector.tests.cleanup import LeavesNoContactsBehind
 
@@ -29,7 +31,8 @@ class TestTheAppIsReachable(LeavesNoContactsBehind, IntegrationTestCase):
 	def test_the_hook_is_declared_with_a_route_and_a_permission(self):
 		entry = _entry()
 		self.assertIsNotNone(entry, "no add_to_apps_screen entry: the app is unfindable")
-		self.assertEqual(entry.get("route"), f"/desk/{WORKSPACE.lower().replace(' ', '-')}")
+		# /desk on Frappe 16, /app on Frappe 15 (hooks.py, compat.remount_desk_route).
+		self.assertEqual(entry.get("route"), f"{frappe_desk_mount()}/{WORKSPACE.lower().replace(' ', '-')}")
 		self.assertTrue(
 			entry.get("has_permission"),
 			"without has_permission the tile is shown to users who cannot open it",
@@ -119,6 +122,8 @@ class TestTheDesktopIconExists(IntegrationTestCase):
 
 	def test_migrate_moves_the_tile_off_the_old_logo(self):
 		"""An app tile still showing the old link glyph gets the current logo; a client's own logo stays."""
+		if not has_app_desktop():
+			self.skipTest("Frappe 16 desk only: Frappe 15 has no app tiles or Workspace Sidebar")
 		from sigzenlead_connector.install import _ensure_app_icon
 
 		name = frappe.db.get_value("Desktop Icon", {"icon_type": "App", "app": APP})
@@ -150,6 +155,8 @@ class TestTheDesktopIconExists(IntegrationTestCase):
 
 	def test_the_workspace_has_a_desktop_icon(self):
 		"""Either the workspace's own icon (older installs) or the app tile (a fresh one)."""
+		if not has_app_desktop():
+			self.skipTest("Frappe 16 desk only: Frappe 15 has no app tiles or Workspace Sidebar")
 		from sigzenlead_connector.install import workspace_is_on_the_desk
 
 		self.assertTrue(

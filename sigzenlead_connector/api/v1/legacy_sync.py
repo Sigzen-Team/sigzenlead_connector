@@ -133,11 +133,22 @@ def upsert_document(
 	if not payload and not name:
 		frappe.throw(_("Data is required to create {0}.").format(doctype))
 
+	# Central names the lead source master "UTM Source" (ERPNext 16). ERPNext 15 has no such
+	# DocType; its Lead.source links to "Lead Source", so write that one instead. Only when UTM
+	# Source is missing: ERPNext 16 is untouched.
+	if doctype == "UTM Source" and not frappe.db.exists("DocType", "UTM Source"):
+		doctype = "Lead Source"
+
 	# Unknown fieldnames are DROPPED rather than refused. A central site may know a field this
 	# client's version does not have, and refusing the whole document over one stray key would
 	# lose the lead for a difference that does not matter.
 	meta = frappe.get_meta(doctype)
 	clean = {k: v for k, v in payload.items() if k == "name" or meta.has_field(k)}
+	# Lead Source (ERPNext 15) is named from its source_name field, not by prompt.
+	if doctype == "Lead Source" and not clean.get("source_name"):
+		source_name = name or clean.get("name")
+		if source_name:
+			clean["source_name"] = source_name
 
 	force_mandatory = bool(int(ignore_mandatory or 0))
 

@@ -32,8 +32,12 @@ Last reviewed: 2026-10-19, for release 1.1.0.
       `.pre-commit-config.yaml`). Frappe semgrep rules: 0 findings. The manual
       commits that remain are one-time migration stages and single-use token issuance, each
       annotated with its reason.
-- [x] **Plays well with other apps.** Lead is extended (`extend_doctype_class`), not
-      overridden. No standard field is hidden, renamed or made read-only.
+- [x] **Plays well with other apps.** On Frappe 16 Lead is extended (`extend_doctype_class`),
+      not overridden. Frappe 15 has no such hook, so there it is attached with
+      `override_doctype_class`. No standard field is hidden, renamed or made read-only.
+- [x] **Frappe/ERPNext 15 and 16.** Installed, migrated and tested on both (see
+      docs/REFERENCE.md, Compatibility). `[tool.bench.frappe-dependencies]` declares
+      `>=15.0.0,<17.0.0`.
 - [x] **No outbound traffic.** No network calls, no scheduler events, no webhooks, no email.
 - [x] **No switch that does nothing.** The inert `allow_insecure_http` setting is removed.
 - [x] **Existing data is safe.** Installing and migrating do not touch existing Leads, Contacts
@@ -81,6 +85,6 @@ the repository has to be on a host it can reach (GitHub is what the Marketplace 
 ### 4. Release
 
 - [ ] Add the app in the Frappe Cloud dashboard, choose the `master` branch for version 16 and
-      confirm it builds
+      for version 15, and confirm it builds on both
 - [ ] Install it on a Frappe Cloud test site and pair it once with SigzenLEAD end to end
 - [ ] Submit for review and answer the reviewer's questions

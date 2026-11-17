@@ -12,7 +12,7 @@ and with the card photos attached.
 | --- | --- |
 | App name | `sigzenlead_connector` |
 | Version | 1.1.1 |
-| Works with | Frappe 16, ERPNext 16 |
+| Works with | Frappe 15 and 16, ERPNext 15 and 16 |
 | Licence | MIT |
 | Publisher | Sigzen Technologies Pvt. Ltd. |
 
@@ -64,7 +64,7 @@ install the SigzenLEAD app on your team's phones. Then install this connector an
 - **All the phones and emails on a card.** A card with three numbers keeps all three.
 - **Card photos attached.** The front and back images are saved on the Lead as private files.
 - **Lead source included.** The expo, event or campaign a lead was captured at is filed as its
-  source (`UTM Source` on ERPNext 16).
+  source (`UTM Source` on ERPNext 16, `Lead Source` on ERPNext 15; created if missing).
 - **Never half a lead.** Each lead is written in a single transaction: the Lead, its Contact,
   its Address and its files are all saved, or none of them are.
 - **No duplicates from retries.** A lead that is sent twice is recognised and updated, not
@@ -95,14 +95,15 @@ once.
 
 ## Requirements
 
-- Frappe Framework **version 16**
-- ERPNext **version 16** (required; the app refuses to install without it)
+- Frappe Framework **version 15 or 16**
+- ERPNext **version 15 or 16**, the same major as Frappe (required; the app refuses to
+  install without it)
 - An **SigzenLEAD** business account on a plan that includes the ERPNext connection
 - An **Address Template** on the site (*Setup > Printing and Branding > Address Template*).
   ERPNext cannot save any Address without one, and a site created without the setup wizard
   has none.
 
-Tested on MariaDB 10.11, which Frappe Cloud uses, and on SQLite.
+Tested on MariaDB 10.11, which Frappe Cloud uses, and on SQLite (Frappe 16).
 
 ## Installation
 
