@@ -20,7 +20,7 @@
  ],
  "fields": [
   {
-   "description": "Identity of this source on the central SigzenLead site.",
+   "description": "Identity of this source on the central SigzenLEAD site.",
    "fieldname": "vc_uuid",
    "fieldtype": "Data",
    "in_list_view": 1,

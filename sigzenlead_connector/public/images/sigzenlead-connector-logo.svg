@@ -1,16 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="SigzenLead - Connector">
-  <title>SigzenLead - Connector</title>
-  <!-- Same family as the SigzenLead mark (orange rounded square, white scan-frame brackets,
-       3.5 round strokes). Where the app's mark has a scan line, the connector has a database:
-       scanned cards land in this ERPNext. Pure geometry, no third-party marks. -->
-  <rect width="64" height="64" rx="14" fill="#E8590C"/>
-  <g fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M17 25v-4a4 4 0 0 1 4-4h4"/>
-    <path d="M47 25v-4a4 4 0 0 0-4-4h-4"/>
-    <path d="M17 39v4a4 4 0 0 0 4 4h4"/>
-    <path d="M47 39v4a4 4 0 0 1-4 4h-4"/>
-    <ellipse cx="32" cy="25" rx="8" ry="3"/>
-    <path d="M24 25v14a8 3 0 0 0 16 0V25"/>
-    <path d="M24 32a8 3 0 0 0 16 0"/>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" role="img" aria-label="SigzenLEAD - Connector" viewBox="0 0 64 64"><title>SigzenLEAD - Connector</title><rect width="64" height="64" rx="14" fill="#EA580C"/><rect x="13" y="14" width="44" height="28" rx="5" fill="#FDBA74"/><rect x="7" y="21" width="44" height="28" rx="5" fill="#fff"/><path d="M18.5 28.4C19.127 32.822 20.678 34.373 25.1 35C20.678 35.627 19.127 37.178 18.5 41.6C17.873 37.178 16.322 35.627 11.9 35C16.322 34.373 17.873 32.822 18.5 28.4Z" fill="#EA580C"/><path d="M24.8 26.9C25.0185 28.441 25.559 28.9815 27.1 29.2C25.559 29.418499999999998 25.0185 29.959 24.8 31.5C24.581500000000002 29.959 24.041 29.418499999999998 22.5 29.2C24.041 28.9815 24.581500000000002 28.441 24.8 26.9Z" fill="#EA580C"/><path d="M30 30.5H44M30 35.5H41M30 40.5H36" stroke="#EA580C" stroke-width="2.8" stroke-linecap="round"/></svg>

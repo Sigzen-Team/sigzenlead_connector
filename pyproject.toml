@@ -3,7 +3,7 @@ name = "sigzenlead_connector"
 authors = [
     { name = "Sigzen Technologies Pvt. Ltd.", email = "support@sigzen.com"}
 ]
-description = "Receive business-card leads from SigzenLead into ERPNext as standard Leads, Contacts and Addresses."
+description = "Receive business-card leads from SigzenLEAD into ERPNext as standard Leads, Contacts and Addresses."
 requires-python = ">=3.10"
 readme = "README.md"
 license = { file = "license.txt" }
@@ -22,9 +22,9 @@ dependencies = [
 [project.urls]
 # The source of record. Frappe Cloud can only install from a repository it can reach, so
 # when this is mirrored to a public host these three lines move with it (see MARKETPLACE.md).
-Homepage = "http://192.168.1.51/Sigzen-Team/ai_snaplead_connector"
-Repository = "http://192.168.1.51/Sigzen-Team/ai_snaplead_connector.git"
-Changelog = "http://192.168.1.51/Sigzen-Team/ai_snaplead_connector/-/blob/master/CHANGELOG.md"
+Homepage = "https://github.com/Sigzen-Team/sigzenlead_connector"
+Repository = "https://github.com/Sigzen-Team/sigzenlead_connector.git"
+Changelog = "https://github.com/Sigzen-Team/sigzenlead_connector/blob/master/CHANGELOG.md"
 
 [build-system]
 requires = ["flit_core >=3.4,<4"]
@@ -36,10 +36,10 @@ build-backend = "flit_core.buildapi"
 # what lets a site that still lists an old name import its stand-in and be renamed on migrate.
 
 # What bench and Frappe Cloud check before installing: this app is built and tested on
-# version 16 of both. ERPNext is a hard dependency (see required_apps in hooks.py).
+# versions 15 and 16 of both. ERPNext is a hard dependency (see required_apps in hooks.py).
 [tool.bench.frappe-dependencies]
-frappe = ">=16.0.0,<17.0.0"
-erpnext = ">=16.0.0,<17.0.0"
+frappe = ">=15.0.0,<17.0.0"
+erpnext = ">=15.0.0,<17.0.0"
 
 # These dependencies are only installed when developer mode is enabled
 [tool.bench.dev-dependencies]

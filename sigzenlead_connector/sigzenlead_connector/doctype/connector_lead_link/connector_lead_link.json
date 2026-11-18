@@ -22,7 +22,7 @@
  ],
  "fields": [
   {
-   "description": "Identity of this record on the central SigzenLead site. One central record maps to exactly one Lead. NULL while the row is a placeholder written by the legacy field migration for a Lead that has a business but has never been pushed under protocol 1; the first push adopts the row and fills this in. UNIQUE ignores NULLs, so any number of placeholders can coexist -- but only one per Lead.",
+   "description": "Identity of this record on the central SigzenLEAD site. One central record maps to exactly one Lead. NULL while the row is a placeholder written by the legacy field migration for a Lead that has a business but has never been pushed under protocol 1; the first push adopts the row and fills this in. UNIQUE ignores NULLs, so any number of placeholders can coexist -- but only one per Lead.",
    "fieldname": "vc_uuid",
    "fieldtype": "Data",
    "in_list_view": 1,

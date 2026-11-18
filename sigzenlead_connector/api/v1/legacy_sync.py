@@ -133,11 +133,22 @@ def upsert_document(
 	if not payload and not name:
 		frappe.throw(_("Data is required to create {0}.").format(doctype))
 
+	# Central names the lead source master "UTM Source" (ERPNext 16). ERPNext 15 has no such
+	# DocType; its Lead.source links to "Lead Source", so write that one instead. Only when UTM
+	# Source is missing: ERPNext 16 is untouched.
+	if doctype == "UTM Source" and not frappe.db.exists("DocType", "UTM Source"):
+		doctype = "Lead Source"
+
 	# Unknown fieldnames are DROPPED rather than refused. A central site may know a field this
 	# client's version does not have, and refusing the whole document over one stray key would
 	# lose the lead for a difference that does not matter.
 	meta = frappe.get_meta(doctype)
 	clean = {k: v for k, v in payload.items() if k == "name" or meta.has_field(k)}
+	# Lead Source (ERPNext 15) is named from its source_name field, not by prompt.
+	if doctype == "Lead Source" and not clean.get("source_name"):
+		source_name = name or clean.get("name")
+		if source_name:
+			clean["source_name"] = source_name
 
 	force_mandatory = bool(int(ignore_mandatory or 0))
 
@@ -205,7 +216,7 @@ def issue_connector_token(business_id: str | None = None):
 
 	Central sends the business it is connecting for, so nobody has to open this site to type
 	it. A blank Business ID is filled in; the same one is a no-op. A DIFFERENT one is refused
-	and no token is minted: this site already belongs to another SigzenLead business, and
+	and no token is minted: this site already belongs to another SigzenLEAD business, and
 	moving it is the deliberate System Manager change in Connector Settings (which re-stamps
 	the rows that carry the old id) -- never a side effect of someone else's onboarding.
 	Omitted, the endpoint behaves exactly as in 1.1.0.
@@ -222,7 +233,7 @@ def issue_connector_token(business_id: str | None = None):
 		claimed = business_id.strip() if isinstance(business_id, str) else ""
 		if not BUSINESS_ID_PATTERN.match(claimed):
 			return _token_refusal(
-				"VALIDATION_FAILED", _("business_id is not a valid SigzenLead business ID.")
+				"VALIDATION_FAILED", _("business_id is not a valid SigzenLEAD business ID.")
 			)
 
 		current = (settings.business_id or "").strip()
@@ -230,7 +241,7 @@ def issue_connector_token(business_id: str | None = None):
 			return _token_refusal(
 				"BUSINESS_MISMATCH",
 				_(
-					"This ERPNext is already linked to another SigzenLead business ({0}), not {1}."
+					"This ERPNext is already linked to another SigzenLEAD business ({0}), not {1}."
 					" An ERPNext System Manager must change Business ID in Connector Settings"
 					" before it can be connected to this business."
 				).format(current, claimed),
