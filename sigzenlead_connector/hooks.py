@@ -68,6 +68,15 @@ add_to_apps_screen = [
 	}
 ]
 
+from sigzenlead_connector.compat import remount_desk_route as _remount_desk_route
+
+# Frappe 15 mounts the desk at /app, and its is_desk_apps() matches ^/app(/.*)?$ -- the
+# mirror image of the note above. There, and only there, the same routes are given under /app;
+# Frappe 16 keeps /desk (compat.remount_desk_route returns them unchanged).
+app_home = _remount_desk_route(app_home)
+for _entry in add_to_apps_screen:
+	_entry["route"] = _remount_desk_route(_entry["route"])
+
 # Includes in <head>
 # ------------------
 
@@ -135,8 +144,8 @@ before_install = "sigzenlead_connector.install.before_install"
 after_install = "sigzenlead_connector.install.after_install"
 # The module and the workspace were renamed. This has to run before every patch and before
 # the model sync, or each DocType of this app fails to load -- see brand_rename.py.
-# check_frappe_version first: on Frappe < 16 extend_doctype_class does not exist, so refuse
-# the migrate with a clear message rather than leave Lead without this app's extension.
+# check_frappe_version first: refuse Frappe < 15 (no supported way to attach the Lead
+# extension) with a clear message rather than leave Lead without this app's extension.
 before_migrate = [
 	"sigzenlead_connector.install.check_frappe_version",
 	"sigzenlead_connector.brand_rename.execute",
@@ -189,10 +198,30 @@ after_migrate = "sigzenlead_connector.install.after_migrate"
 # only one app on a site can win that: a client who also runs another app that overrides Lead
 # would silently lose one of the two. `extend_doctype_class` mixes this class in front of
 # whatever controller the site already resolves for Lead, so both keep working.
+#
+# `extend_doctype_class` exists from Frappe 16. Frappe 15 ignores the key without a word, so
+# there -- and only there -- the same class is attached with `override_doctype_class`
+# (CustomLead subclasses ERPNext's Lead, which is what an override must be). The check is
+# on the feature, not the version string; the name starts with "_" so frappe does not read it
+# as a hook.
 
-extend_doctype_class = {
-	"Lead": ["sigzenlead_connector.overrides.lead.CustomLead"],
-}
+
+def _frappe_extends_doctype_classes():
+	try:
+		from frappe.model.base_document import _get_extended_class
+	except ImportError:
+		return False
+	return True
+
+
+if _frappe_extends_doctype_classes():
+	extend_doctype_class = {
+		"Lead": ["sigzenlead_connector.overrides.lead.CustomLead"],
+	}
+else:
+	override_doctype_class = {
+		"Lead": "sigzenlead_connector.overrides.lead.CustomLead",
+	}
 
 # Document Events
 # ---------------

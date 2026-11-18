@@ -31,6 +31,7 @@ import frappe
 from frappe.tests import IntegrationTestCase
 
 from sigzenlead_connector.api.v1 import legacy_sync, sync
+from sigzenlead_connector.brand_rename import has_app_desktop
 from sigzenlead_connector.upgrade import from_old_package as upgrade
 
 #: Every earlier package name; each one has a stand-in package and API aliases.
@@ -121,14 +122,20 @@ class TestUpgradeFromTheOldPackage(IntegrationTestCase):
 			with self.subTest(old=old):
 				self.assertEqual(frappe.db.count("Module Def", {"app_name": old}), 0)
 				self.assertEqual(frappe.db.count("Patch Log", {"patch": ("like", f"{old}.%")}), 0)
-				self.assertEqual(frappe.db.count("Desktop Icon", {"app": old}), 0)
-				self.assertEqual(frappe.db.count("Workspace", {"app": old}), 0)
-				self.assertEqual(
-					frappe.db.count("Desktop Icon", {"logo_url": ("like", f"/assets/{old}/%")}), 0
-				)
+				# Desktop Icon.app / logo_url and Workspace.app are Frappe 16 columns.
+				if frappe.get_meta("Desktop Icon").has_field("app"):
+					self.assertEqual(frappe.db.count("Desktop Icon", {"app": old}), 0)
+				if frappe.get_meta("Workspace").has_field("app"):
+					self.assertEqual(frappe.db.count("Workspace", {"app": old}), 0)
+				if frappe.get_meta("Desktop Icon").has_field("logo_url"):
+					self.assertEqual(
+						frappe.db.count("Desktop Icon", {"logo_url": ("like", f"/assets/{old}/%")}), 0
+					)
 
 	def test_app_columns_and_asset_urls_are_rewritten(self):
 		"""Throwaway names again; rolled back by IntegrationTestCase."""
+		if not has_app_desktop():
+			self.skipTest("Frappe 16 desk only: Frappe 15 has no app tiles or Workspace Sidebar")
 		old_app, new_app = "zz_old_pkg", "zz_new_pkg"
 		frappe.get_doc(
 			{

@@ -21,6 +21,8 @@ import frappe
 from frappe.tests import IntegrationTestCase
 
 from sigzenlead_connector import install
+from sigzenlead_connector.brand_rename import has_app_desktop
+from sigzenlead_connector.compat import frappe_desk_mount
 
 
 class TestWorkspaceRepair(IntegrationTestCase):
@@ -61,6 +63,8 @@ class TestWorkspaceRepair(IntegrationTestCase):
 
 	def test_sidebar_entry_named_after_a_renamed_doctype_is_relabelled(self):
 		"""A migrated client's sidebar read "VC Connector Settings" while opening Connector Settings."""
+		if not has_app_desktop():
+			self.skipTest("Frappe 16 desk only: Frappe 15 has no app tiles or Workspace Sidebar")
 
 		def entry(label, link_to):
 			row = frappe.get_doc(
@@ -93,7 +97,11 @@ class TestWorkspaceRepair(IntegrationTestCase):
 	def test_tile_on_the_ai_snaplead_logo_moves_to_the_shipped_one(self):
 		"""The package rename rewrote only the /assets/<package>/ prefix: the tile pointed at
 		/assets/sigzenlead_connector/images/ai-snaplead-connector-logo.svg, which is not shipped."""
-		icon = frappe.db.get_value("Desktop Icon", {"icon_type": "App", "app": install.APP}, ["name", "logo_url"], as_dict=True)
+		if not has_app_desktop():
+			self.skipTest("Frappe 16 desk only: Frappe 15 has no app tiles or Workspace Sidebar")
+		icon = frappe.db.get_value(
+			"Desktop Icon", {"icon_type": "App", "app": install.APP}, ["name", "logo_url"], as_dict=True
+		)
 		if not icon:
 			self.skipTest("no app tile on this site")
 		self.addCleanup(
@@ -108,7 +116,9 @@ class TestWorkspaceRepair(IntegrationTestCase):
 		self.assertEqual(frappe.db.get_value("Desktop Icon", icon.name, "logo_url"), logo)
 		import os
 
-		shipped = os.path.join(frappe.get_app_path(install.APP, "public"), logo.split(f"/assets/{install.APP}/", 1)[1])
+		shipped = os.path.join(
+			frappe.get_app_path(install.APP, "public"), logo.split(f"/assets/{install.APP}/", 1)[1]
+		)
 		self.assertTrue(os.path.exists(shipped), shipped)
 
 	def test_header_sync_rewrites_the_legacy_name(self):
@@ -165,7 +175,9 @@ class TestWorkspaceRepair(IntegrationTestCase):
 			self.fail(f"ensure_workspace propagated a step failure: {exc}")
 
 		# The step AFTER the failing one still ran: the tile is not left on External, which
-		# is what makes it open in a new window.
+		# is what makes it open in a new window. (Frappe 16 desk only.)
+		if not has_app_desktop():
+			return
 		icon = frappe.db.get_value(
 			"Desktop Icon", {"link_to": install.SIDEBAR, "icon_type": "App"}, "link_type"
 		)
@@ -220,7 +232,8 @@ class TestBrandRename(IntegrationTestCase):
 		title = frappe.get_hooks("app_title", app_name="sigzenlead_connector")[0]
 		self.assertEqual(title, install.APP_LABEL)
 		self.assertEqual(
-			frappe.get_hooks("app_home", app_name="sigzenlead_connector")[-1], "/desk/sigzenlead-connector"
+			frappe.get_hooks("app_home", app_name="sigzenlead_connector")[-1],
+			f"{frappe_desk_mount()}/sigzenlead-connector",
 		)
 		if frappe.db.exists("Workspace", install.WORKSPACE):
 			row = frappe.db.get_value("Workspace", install.WORKSPACE, ["label", "title"], as_dict=True)

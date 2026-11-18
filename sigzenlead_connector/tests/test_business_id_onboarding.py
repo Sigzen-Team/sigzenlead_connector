@@ -19,7 +19,9 @@ STARTING_HASH = hashlib.sha256(b"starting-token").hexdigest()
 
 
 def _stored(field):
-	return frappe.db.get_single_value(SETTINGS, field) or ""
+	# cache=False: Frappe 15 keeps single values in a per-request cache that clear_cache() does
+	# not reset, so a cached read would report the value from before the call under test.
+	return frappe.db.get_single_value(SETTINGS, field, cache=False) or ""
 
 
 class IssueTokenTestCase(SettingsTestCase):

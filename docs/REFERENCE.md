@@ -45,10 +45,23 @@ and for the one other field that is currently inert.
 
 | | |
 | --- | --- |
-| Frappe | **16** (verified on 16.25.0 and 16.26.3) |
-| ERPNext | **16** (verified on 16.26.2 and 16.27.0) — required; installation is refused without it |
+| Frappe | **15** (verified on 15.126.1) and **16** (verified on 16.25.0 and 16.26.3) |
+| ERPNext | **15** (verified on 15.125.0) and **16** (verified on 16.26.2 and 16.27.0) — required; installation is refused without it |
 | Python | 3.10+ (`requires-python` in `pyproject.toml`) |
-| Database | Verified on **MariaDB 10.11** and on **SQLite** |
+| Database | Verified on **MariaDB 10.11** and on **SQLite** (SQLite needs Frappe 16) |
+
+**Frappe 15 vs 16.** One code path; the differences are detected by feature, not by version:
+
+- **Lead extension.** Frappe 16 mixes `CustomLead` into the Lead controller with
+  `extend_doctype_class`, which composes with other apps. Frappe 15 has no such hook, so there
+  the same class is attached with `override_doctype_class`. On Frappe 15 a second app that also
+  overrides Lead wins or loses by app order; on Frappe 16 both keep working.
+- **Lead source.** ERPNext 16 has `Lead.utm_source` -> `UTM Source`; ERPNext 15 has
+  `Lead.source` -> `Lead Source`. The connector writes whichever the site has and creates the
+  record when it is missing (`ping()` reports the field as `lead_source_field`).
+- **Desk.** The app tile, Workspace Sidebar and Desktop Icon repairs run only where the Frappe
+  16 desk exists (`Workspace Sidebar` DocType). On Frappe 15 the workspace appears in the
+  sidebar from the Workspace record alone, and `/desk/...` links redirect to `/app/...`.
 
 ERPNext is a hard dependency, not an optional integration: this app writes `Lead`, `Contact`
 and `Address`, and `install.py:check_erpnext_installed` throws if `erpnext` is not among the

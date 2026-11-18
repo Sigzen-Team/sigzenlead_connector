@@ -56,7 +56,7 @@ silently dropped.
 | `state` | `Lead.state` | Normalised through `utils.india_state.canonical_state`. |
 | `country` | `Lead.country` | |
 | `whatsapp_no` | `Lead.whatsapp_no` | |
-| `source` | `Lead.utm_source` **or** `Lead.source` | Resolved at runtime. ERPNext v16 renamed the field; `ping()` reports which one this site has as `lead_source_field`. |
+| `source` | `Lead.utm_source` **or** `Lead.source` | Resolved at runtime. ERPNext 16: `Lead.utm_source` -> a `UTM Source` record; ERPNext 15: `Lead.source` -> a `Lead Source` record. The record is created when missing, on both. `ping()` reports which field this site has as `lead_source_field`. |
 | `address_text` | `Lead.custom_address` | The one Custom Field this app keeps. Raw scanned address block; it has no standard ERPNext home. Central sends Line 1 and Line 2 joined with ", ". |
 | `pincode` | `Lead.custom_pincode`, **or** `Address.pincode` | While the legacy field exists it is written there. Once it has been dropped the value is routed to the Lead's Address — preferring the address the payload is already writing, otherwise via `ensure_pincode_on_address`, which never overwrites a different pincode a human typed. |
 | `scanned_text` | `Lead.custom_scanned_text`, **or** a tagged `CRM Note` | Same rule: the Custom Field while it exists, a tagged note on the Lead once it is gone. |
