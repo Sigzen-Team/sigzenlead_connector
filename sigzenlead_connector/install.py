@@ -34,8 +34,8 @@ INTEGRATION_ROLE_PERMISSIONS = {
 #: so any difference produces a URL that resolves to nothing. The route is
 #: /desk/sigzenlead-connector.
 #:
-#: APP_LABEL ("SigzenLead - Connector") is what people read: the tile, the sidebar header and
-#: the heading inside the workspace.
+#: APP_LABEL ("SigzenLead - Connector") is the tile's label and the sidebar's name: desktop.js
+#: finds one by the other, so it is a key. Only the heading inside the workspace is free text.
 from sigzenlead_connector.brand_rename import (
 	APP_LABEL,
 	LEGACY_APP_LABELS,
@@ -43,6 +43,9 @@ from sigzenlead_connector.brand_rename import (
 	LEGACY_WORKSPACES,
 	WORKSPACE,
 )
+
+#: The heading inside the workspace, in the brand sheet's spelling. Free text, unlike APP_LABEL.
+WORKSPACE_HEADING = "SigzenLEAD - Connector"
 
 APP = "sigzenlead_connector"
 
@@ -64,9 +67,10 @@ LEGACY_LOGO_URLS = frozenset(
 )
 
 
-#: extend_doctype_class (hooks.py), which carries the whole Lead extension, exists only from
-#: Frappe v16. On v15 the hook is silently ignored and the app "installs" without it.
-MIN_FRAPPE_MAJOR = 16
+#: The oldest Frappe this app supports. The Lead extension is attached with
+#: extend_doctype_class on v16 and with override_doctype_class on v15 (hooks.py); older
+#: releases are neither built nor tested against.
+MIN_FRAPPE_MAJOR = 15
 
 
 def frappe_major_version(version=None):
@@ -81,13 +85,13 @@ def frappe_major_version(version=None):
 
 
 def check_frappe_version(version=None):
-	"""Refuse to install or migrate on Frappe < 16 instead of silently skipping the Lead extension."""
+	"""Refuse to install or migrate on Frappe < 15 instead of silently skipping the Lead extension."""
 	major = frappe_major_version(version)
 	if major is not None and major < MIN_FRAPPE_MAJOR:
 		frappe.throw(
 			_(
-				"SigzenLead - Connector needs Frappe/ERPNext v16. This site runs Frappe {0}; upgrade"
-				" the bench to v16 before installing or migrating this app."
+				"SigzenLEAD - Connector needs Frappe/ERPNext v15 or v16. This site runs Frappe {0};"
+				" upgrade the bench before installing or migrating this app."
 			).format(version if version is not None else frappe.__version__),
 			title=_("Unsupported Frappe Version"),
 		)
@@ -176,10 +180,16 @@ def repair_desk():
 
 	Every step is idempotent and runs in its own savepoint; nothing here commits.
 	"""
+	from sigzenlead_connector.brand_rename import has_app_desktop
+
+	# The sidebar, tile, icon and saved-layout steps are the Frappe 16 desk (app tiles);
+	# Frappe 15 shows the workspace in its sidebar from the Workspace row alone.
+	app_desktop = has_app_desktop()
 	path = workspace_json_path()
 	changed = bool(_in_savepoint(_rename_legacy_workspace))
-	changed = bool(_in_savepoint(repair_legacy_sidebar_labels)) or changed
-	changed = bool(_in_savepoint(repair_legacy_doctype_sidebar_labels)) or changed
+	if app_desktop:
+		changed = bool(_in_savepoint(repair_legacy_sidebar_labels)) or changed
+		changed = bool(_in_savepoint(repair_legacy_doctype_sidebar_labels)) or changed
 	if not frappe.db.exists("Workspace", WORKSPACE):
 		if not path:
 			return changed
@@ -205,6 +215,12 @@ def repair_desk():
 		_ensure_sidebar_placeholder,
 		_add_icon_to_saved_layouts,
 	):
+		if not app_desktop and step not in (
+			_sync_workspace_roles,
+			_sync_workspace_label,
+			_sync_workspace_header,
+		):
+			continue
 		if step in (_sync_workspace_roles, _sync_workspace_label, _sync_workspace_header):
 			if not path:
 				continue
@@ -392,6 +408,7 @@ def setup_connector_fields():
 	check_erpnext_installed()
 	create_custom_fields()
 	ensure_indexes()
+	point_source_link_at_site_source_doctype()
 	ensure_integration_role()
 	frappe.clear_cache()
 
@@ -571,6 +588,42 @@ def ensure_indexes():
 def check_erpnext_installed():
 	if "erpnext" not in frappe.get_installed_apps():
 		frappe.throw(_("ERPNext app is required before installing Connector app."))
+
+
+#: This app's Link fields to the lead source master. Their JSON says "UTM Source" (ERPNext 16).
+SOURCE_LINK_FIELDS = (
+	("Connector Source Link", "source"),
+	("ERPNext Lead Activity Log", "source"),
+)
+
+
+def point_source_link_at_site_source_doctype():
+	"""SOURCE_LINK_FIELDS link to UTM Source (ERPNext 16). On ERPNext 15, which has Lead Source
+	instead, point them there with Property Setters, so the links have a target.
+
+	Feature-detected both ways: no Property Setter is ever made where UTM Source exists, and one
+	made here is removed once it does (ERPNext 16 renames Lead Source to UTM Source), so an
+	upgraded site falls back to the JSON's own options.
+	"""
+	from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+
+	utm_source = bool(frappe.db.exists("DocType", "UTM Source"))
+	lead_source = bool(frappe.db.exists("DocType", "Lead Source"))
+	for doctype, fieldname in SOURCE_LINK_FIELDS:
+		if not frappe.db.exists("DocType", doctype):
+			continue
+		filters = {"doc_type": doctype, "field_name": fieldname, "property": "options"}
+		if utm_source:
+			if frappe.db.exists("Property Setter", {**filters, "value": "Lead Source"}):
+				frappe.db.delete("Property Setter", {**filters, "value": "Lead Source"})
+				frappe.clear_cache(doctype=doctype)
+			continue
+		if not lead_source or frappe.db.get_value("Property Setter", filters, "value") == "Lead Source":
+			continue
+		make_property_setter(
+			doctype, fieldname, "options", "Lead Source", "Text", validate_fields_for_doctype=False
+		)
+		frappe.clear_cache(doctype=doctype)
 
 
 def get_source_doctype():
@@ -925,9 +978,9 @@ def _sync_workspace_header(path):
 		data = block.get("data") or {}
 		text = data.get("text") or ""
 		if block.get("type") == "header":
-			legacy = next((name for name in LEGACY_APP_LABELS if name in text), None)
-			if legacy and APP_LABEL not in text:
-				data["text"] = text.replace(legacy, APP_LABEL)
+			legacy = next((name for name in (*LEGACY_APP_LABELS, APP_LABEL) if name in text), None)
+			if legacy:
+				data["text"] = text.replace(legacy, WORKSPACE_HEADING)
 				changed = True
 			continue
 
@@ -976,9 +1029,12 @@ def _sync_workspace_label(path):
 		changed = True
 
 	# The SIDEBAR's header reads its own copy: `Workspace Sidebar` is its own doctype, created
-	# once and never revisited.
+	# once and never revisited. Frappe 16 only.
+	from sigzenlead_connector.brand_rename import has_app_desktop
+
 	if (
-		frappe.db.exists("Workspace Sidebar", SIDEBAR)
+		has_app_desktop()
+		and frappe.db.exists("Workspace Sidebar", SIDEBAR)
 		and frappe.db.get_value("Workspace Sidebar", SIDEBAR, "title") != SIDEBAR
 	):
 		frappe.db.set_value("Workspace Sidebar", SIDEBAR, "title", SIDEBAR, update_modified=False)
@@ -1070,8 +1126,8 @@ def _add_icon_to_saved_layouts():
 	return updated
 
 
-#: What the mobile product was called in body copy before it became "SigzenLead".
-LEGACY_PRODUCT_NAMES = ("AI SnapLead", "AI Scan CRM", "VC Scan", "Sigzen Scan", "SigzenScan")
+#: What the mobile product was called in body copy before it became "SigzenLEAD".
+LEGACY_PRODUCT_NAMES = ("SigzenLead", "AI SnapLead", "AI Scan CRM", "VC Scan", "Sigzen Scan", "SigzenScan")
 
 
 def _rename_legacy_workspace():

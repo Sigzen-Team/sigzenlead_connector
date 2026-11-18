@@ -101,13 +101,27 @@ def rename_desk():
 	UNIQUE) and the workspace's own hidden Link icon. The heading inside `Workspace.content` is
 	repaired after the sync by install.ensure_workspace.
 	"""
+	app_desktop = has_app_desktop()
 	for legacy in LEGACY_WORKSPACES:
 		_step(rename_workspace, legacy, WORKSPACE)
-		_step(rename_sidebar, legacy, WORKSPACE if legacy == PREVIOUS_WORKSPACE else APP_LABEL)
-		_step(repoint_icon_links, legacy)
+		if app_desktop:
+			_step(rename_sidebar, legacy, WORKSPACE if legacy == PREVIOUS_WORKSPACE else APP_LABEL)
+			_step(repoint_icon_links, legacy)
+	if not app_desktop:
+		return
 	for legacy in LEGACY_APP_LABELS:
 		_step(rename_app_icon, legacy, APP_LABEL)
 	_step(retire_legacy_link_icons)
+
+
+def has_app_desktop():
+	"""Whether this Frappe builds its desk from app tiles: Workspace Sidebar + the v16 Desktop Icon.
+
+	Frappe 16 only. Frappe 15 has no Workspace Sidebar and an older Desktop Icon without
+	icon_type / link_type / link_to, so every tile, sidebar and icon repair has nothing to
+	repair there and would only fail on a missing column. A feature check, not a version one.
+	"""
+	return bool(frappe.db.exists("DocType", "Workspace Sidebar"))
 
 
 def refresh_module_map():
@@ -204,7 +218,8 @@ def rename_workspace(old, new):
 
 	frappe.rename_doc("Workspace", old, new, force=True, show_alert=False)
 	frappe.db.set_value("Workspace", new, {"label": new, "title": new}, update_modified=False)
-	repoint_sidebar_items(old, new)
+	if has_app_desktop():
+		repoint_sidebar_items(old, new)
 	return True
 
 

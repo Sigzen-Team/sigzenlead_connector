@@ -11,7 +11,7 @@ app_name = "sigzenlead_connector"
 app_title = "SigzenLead - Connector"
 app_publisher = "Sigzen Technologies Pvt. Ltd."
 app_description = (
-	"Receive business-card leads from SigzenLead into ERPNext as standard Leads, Contacts and Addresses."
+	"Receive business-card leads from SigzenLEAD into ERPNext as standard Leads, Contacts and Addresses."
 )
 app_email = "support@sigzen.com"
 app_license = "mit"
@@ -30,7 +30,7 @@ required_apps = ["erpnext"]
 # Put the app on the /apps screen. Without this the app installs and works, but a client
 # has no way to FIND it: its doctypes are only reachable by typing a URL. The route points
 # at the app's own workspace rather than a custom page, so there is one place to configure.
-# The logo is the SigzenLead - Connector mark (see the "logo" key below).
+# The logo is the SigzenLEAD - Connector mark (see the "logo" key below).
 #
 # app_logo_url is deliberately NOT set. Frappe already takes this app's logo for /apps, the
 # app switcher and the sidebar header from add_to_apps_screen. And navbar_settings.get_app_logo()
@@ -53,7 +53,7 @@ add_to_apps_screen = [
 		# are created -- so a missing key leaves the CLIENT's whole site with no desktop
 		# icons, failing silently inside a print()-only except block.
 		#
-		# The SigzenLead family mark (scan frame around a database: scanned cards landing in
+		# The SigzenLEAD family mark (scan frame around a database: scanned cards landing in
 		# this ERPNext). images/vc-connector-logo.svg, the path 1.1.0 and earlier shipped, holds
 		# the same mark for icons that still point there; install.repair_desk() repoints them.
 		"logo": "/assets/sigzenlead_connector/images/sigzenlead-connector-logo.svg",
@@ -67,6 +67,15 @@ add_to_apps_screen = [
 		"has_permission": "sigzenlead_connector.install.has_app_permission",
 	}
 ]
+
+from sigzenlead_connector.compat import remount_desk_route as _remount_desk_route
+
+# Frappe 15 mounts the desk at /app, and its is_desk_apps() matches ^/app(/.*)?$ -- the
+# mirror image of the note above. There, and only there, the same routes are given under /app;
+# Frappe 16 keeps /desk (compat.remount_desk_route returns them unchanged).
+app_home = _remount_desk_route(app_home)
+for _entry in add_to_apps_screen:
+	_entry["route"] = _remount_desk_route(_entry["route"])
 
 # Includes in <head>
 # ------------------
@@ -135,8 +144,8 @@ before_install = "sigzenlead_connector.install.before_install"
 after_install = "sigzenlead_connector.install.after_install"
 # The module and the workspace were renamed. This has to run before every patch and before
 # the model sync, or each DocType of this app fails to load -- see brand_rename.py.
-# check_frappe_version first: on Frappe < 16 extend_doctype_class does not exist, so refuse
-# the migrate with a clear message rather than leave Lead without this app's extension.
+# check_frappe_version first: refuse Frappe < 15 (no supported way to attach the Lead
+# extension) with a clear message rather than leave Lead without this app's extension.
 before_migrate = [
 	"sigzenlead_connector.install.check_frappe_version",
 	"sigzenlead_connector.brand_rename.execute",
@@ -189,10 +198,30 @@ after_migrate = "sigzenlead_connector.install.after_migrate"
 # only one app on a site can win that: a client who also runs another app that overrides Lead
 # would silently lose one of the two. `extend_doctype_class` mixes this class in front of
 # whatever controller the site already resolves for Lead, so both keep working.
+#
+# `extend_doctype_class` exists from Frappe 16. Frappe 15 ignores the key without a word, so
+# there -- and only there -- the same class is attached with `override_doctype_class`
+# (CustomLead subclasses ERPNext's Lead, which is what an override must be). The check is
+# on the feature, not the version string; the name starts with "_" so frappe does not read it
+# as a hook.
 
-extend_doctype_class = {
-	"Lead": ["sigzenlead_connector.overrides.lead.CustomLead"],
-}
+
+def _frappe_extends_doctype_classes():
+	try:
+		from frappe.model.base_document import _get_extended_class
+	except ImportError:
+		return False
+	return True
+
+
+if _frappe_extends_doctype_classes():
+	extend_doctype_class = {
+		"Lead": ["sigzenlead_connector.overrides.lead.CustomLead"],
+	}
+else:
+	override_doctype_class = {
+		"Lead": "sigzenlead_connector.overrides.lead.CustomLead",
+	}
 
 # Document Events
 # ---------------
