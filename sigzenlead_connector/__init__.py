@@ -1,4 +1,4 @@
-__version__ = "1.1.1"
+__version__ = '1.0.1'
 
 try:  # Frappe 15 support; a no-op on Frappe 16 and when frappe is not importable (packaging).
 	from .compat import install_test_case_aliases
