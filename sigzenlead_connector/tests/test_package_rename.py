@@ -30,6 +30,7 @@ from unittest import mock
 import frappe
 from frappe.tests import IntegrationTestCase
 
+import sigzenlead_connector
 from sigzenlead_connector.api.v1 import legacy_sync, sync
 from sigzenlead_connector.brand_rename import has_app_desktop
 from sigzenlead_connector.upgrade import from_old_package as upgrade
@@ -171,11 +172,29 @@ class TestTheOldNameStillLoads(IntegrationTestCase):
 				self.assertIsNotNone(module.__file__)
 
 	def test_frappe_can_read_it_as_an_app(self):
+		from frappe.modules.patch_handler import get_patches_from_app
+
 		for old in OLD_NAMES:
-			for name in ("modules.txt", "patches.txt"):
-				with self.subTest(old=old, file=name):
-					self.assertTrue(os.path.exists(frappe.get_app_path(old, name)))
-			self.assertEqual(frappe.get_module_list(old), [])
+			with self.subTest(old=old):
+				self.assertTrue(os.path.exists(frappe.get_app_path(old, "modules.txt")))
+				self.assertEqual(frappe.get_module_list(old), [])
+				# No patches.txt on purpose (see the test below); migrate reads that as "no patches".
+				self.assertFalse(os.path.exists(frappe.get_app_path(old, "patches.txt")))
+				self.assertEqual(get_patches_from_app(old), [])
+
+	def test_frappe_cloud_detects_the_real_package(self):
+		"""Frappe Cloud (press api/github.py _get_app_name_and_title_from_hooks) names the app after
+		the FIRST top-level folder, alphabetically, that holds both hooks.py and patches.txt. With
+		the stand-ins carrying a patches.txt that was `ai_snaplead_connector`, so the Marketplace
+		built the empty stand-in ("old name, renamed on migrate") instead of this app."""
+		root = os.path.dirname(os.path.dirname(sigzenlead_connector.__file__))
+		apps = sorted(
+			name
+			for name in os.listdir(root)
+			if os.path.isfile(os.path.join(root, name, "hooks.py"))
+			and os.path.isfile(os.path.join(root, name, "patches.txt"))
+		)
+		self.assertEqual(apps, ["sigzenlead_connector"])
 
 	def test_its_only_hook_is_the_upgrade(self):
 		for old in OLD_NAMES:

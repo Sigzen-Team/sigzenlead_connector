@@ -18,6 +18,19 @@ breaking change for every central site in the field and gets its own major relea
 
 ---
 
+## Unreleased: Frappe Cloud builds the right app
+
+### Fixed
+
+- **Frappe Cloud / Marketplace detected the app as `ai_snaplead_connector`.** Frappe Cloud names
+  an app after the first top-level folder, alphabetically, that holds both `hooks.py` and
+  `patches.txt`. The three old-name stand-ins (`ai_snaplead_connector`,
+  `sigzen_ai_scan_crm_connector`, `vc_connector`) each carried an empty `patches.txt`, so
+  `ai_snaplead_connector` won and Frappe Cloud built the empty stand-in instead of this app.
+  The stand-ins no longer ship `patches.txt` (Frappe reads a missing file as "no patches"), so
+  the only folder Frappe Cloud can pick is `sigzenlead_connector`.
+
+
 ## [Unreleased]
 
 ### Changed
